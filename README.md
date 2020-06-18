@@ -8,7 +8,7 @@ I want to present you a few techniques on how to process data from a specific ta
 
 ### Simple Query
 
-<img src="/Users/ckw/Library/Application Support/typora-user-images/image-20191125143119776.png" alt="image-20191125143119776" style="zoom:50%;" />
+<img src="https://github.com/kr4uzi/ServiceNow-Guide/blob/master/image-20191125142745663.png?raw=true" alt="image-20191125143119776" style="zoom:50%;" />
 
 Using encoded Query:
 
@@ -47,7 +47,7 @@ function getEmailIncidents() {
 
 ###Advanced Query
 
-<img src="/Users/ckw/Library/Application Support/typora-user-images/image-20191125160745911.png" alt="image-20191125160745911" style="zoom:50%;" />
+<img src="https://github.com/kr4uzi/ServiceNow-Guide/blob/master/image-20191125160745911.png" alt="image-20191125160745911" style="zoom:50%;" />
 
 ```javascript
 var incidentGr = new GlideRecord("incident");
@@ -263,7 +263,7 @@ function getBoolean() {
 }
 ```
 
-##setLimit
+## setLimit
 
 ```javascript
 function emailIncidentExists() {
@@ -343,7 +343,7 @@ function getOpenedBy(incidentSysId) {
 }
 ```
 
-##Clean Code
+## Clean Code
 
 Try not to build fatal code, this usually implies not returning "null" or "undefined". Consider the following code examples:
 
@@ -423,7 +423,7 @@ In this case we do not have an if-context and this doesnt apply. What gets evalu
 The corrected version of this code is by the way:
 `return incidentGr.description.toString() || incidentGr.short_description.toString()`
 
-##get
+## get
 
 ```javascript
 function closeIncident(titleString) {
