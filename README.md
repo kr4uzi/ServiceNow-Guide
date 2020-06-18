@@ -45,7 +45,7 @@ function getEmailIncidents() {
 }
 ```
 
-###Advanced Query
+### Advanced Query
 
 <img src="https://github.com/kr4uzi/ServiceNow-Guide/blob/master/image-20191125160745911.png" alt="image-20191125160745911" style="zoom:50%;" />
 
@@ -675,7 +675,7 @@ Label=<translated text>
 
 Good Practice for translating UI-Actions is to use a unique identifier for the action name e.g. module_action_name (sys_translated's value=module_action_name). After you have inserted the sys_translated record, the UI Action name field will still store module_action_name but will actually show <translated text> in the Form!
 
-##Client-Side-Scripts
+## Client-Side-Scripts
 
 ```javascript
 new GwtMessage().getMessage("<message_id>")
