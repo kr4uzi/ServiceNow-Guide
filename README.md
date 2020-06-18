@@ -157,7 +157,7 @@ class GlideRecord {
 }
 ```
 
-###Insert
+### Insert
 
 ```typescript
 class GlideRecord {	
@@ -249,7 +249,7 @@ function replaceEmailIncidents() {
 }
 ```
 
-#Best-Practice Code Examples
+# Best-Practice Code Examples
 
 ## getValue on non-string Fields
 
