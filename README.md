@@ -2,11 +2,11 @@
 
 In this reference we want to share my experience with the ServiceNow-Platform and ease the adoption of Best-Practice and ServiceNow specific clean code.
 
-##Transforming Filters into GlideRecord-Queries
+## Transforming Filters into GlideRecord-Queries
 
 I want to present you a few techniques on how to process data from a specific table. You probably want to process only certain records and your starting point is the ServiceDesk with the table opened (Tipp: Enter <table_name>.list or <table_name>.LIST in the Application Navigator's search bar to jump directly to the table's list).
 
-###Simple Query
+### Simple Query
 
 <img src="/Users/ckw/Library/Application Support/typora-user-images/image-20191125143119776.png" alt="image-20191125143119776" style="zoom:50%;" />
 
