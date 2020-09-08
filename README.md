@@ -452,13 +452,13 @@ Client script:
 ```javascript
 function okClicked() {
 	var sysIds = slushBucket.getValues(slushBucket.getRightSelect());
-	if (!departments) {
+	if (!sysIds) {
 		alert("Select something!");
 	} else {	
 		var modal = GlideModal.get();
 		var onSubmit = modal.getPreference("onSubmit");
 		if (typeof onSubmit === "function") {
-			onSubmit(departments);
+			onSubmit(sysIds);
 		}
 	}
 	
