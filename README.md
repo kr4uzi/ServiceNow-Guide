@@ -131,7 +131,7 @@ class GlideRecord {
   orderByDesc(field: string): void;
   
   // INNER JOIN <table> ON <GlideRecord>.grField = <table>.tableField
-	addJoinQuery(table: string, grField: object, tableField: object): GlideQueryCondition;
+  addJoinQuery(table: string, grField: object, tableField: object): GlideQueryCondition;
   
   // see best-practice:setLimit
   setLimit(count: number): void;
@@ -401,6 +401,232 @@ Do not dot Walk in Conditions, instead use: javascript: current.xyz
 ## UI Policies
 
 Dot walking not working properly when used on script fields.
+
+## UI-Action
+
+```javascript
+// action_name: <scope>_<action_identifier>
+// client: true
+// Onclick: handleClientSide()
+// script:
+if (typeof window === "undefined") {
+  
+}
+
+function handleClientSide() {
+  var dialog = new GlideModal('glide_confirm_standard');
+	dialog.setTitle(new GwtMessage().getMessage('Confirmation'));
+	dialog.setPreference('warning', true);
+	dialog.setPreference('title', 'Are you sure?');
+	dialog.setPreference('onPromptComplete', function() {
+		gsftSubmit(null, g_form.getFormElement(), '<scope>_<action_identifier>');
+	});  
+	dialog.render();
+}
+
+function handleServerSide() {
+  current.update();
+  action.setRedirectURL(current);
+  // action.setRedirectUrl("task.do?" + current.sys_id);
+}
+```
+
+## UI-Page
+
+HTML
+
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<g:ui_slushbucket name="slushBucket" />
+	<div class="modal-footer">
+		<span class="pull-right">
+			<g:dialog_buttons_ok_cancel ok="return okClicked()" ok_id="ui_page_ok" cancel="return cancelClicked()" cancel_id="ui_page_cancel" />
+		</span>
+	</div>
+</j:jelly>
+```
+
+Client script:
+
+```javascript
+function okClicked() {
+	var sysIds = slushBucket.getValues(slushBucket.getRightSelect());
+	if (!departments) {
+		alert("Select something!");
+	} else {	
+		var modal = GlideModal.get();
+		var onSubmit = modal.getPreference("onSubmit");
+		if (typeof onSubmit === "function") {
+			onSubmit(departments);
+		}
+	}
+	
+	return false;
+}
+
+function cancelClicked() {
+	// any function registered on onCancel shall handle the close-process
+	// if no function is registered, the dialog will close
+	var modal = GlideModal.get();
+	var onCancel = modal.getPreference("onCancel");
+	if (typeof onSubmit === "function") {
+		onCancel();
+	} else {	
+		GlideModal.get().destroy();
+	}
+	
+	return false;
+}
+
+function initSlushBucket() {
+	slushBucket.clear();
+  slushBucket.addLeftChoice("sys_id", "value 1");
+  
+  document.getElementById("ui_page_ok").disabled = false;
+	document.getElementById("ui_page_cancel").disabled = false;
+  
+  var gdw = GlideDialogWindow.get();
+	var myParam = gdw.getPreference("my_param");
+  
+  var ajax = new GlideAjax("MyScriptInclude");
+	ajax.addParam("sysparm_name", "myFunction");
+  ajax.addParam("my_param", myParam);
+	ajax.getXMLAnswer(function (answer) {
+		var result = JSON.parse(answer);
+		callback(result);
+	});
+}
+
+addLoadEvent(function() {
+	if (typeof g_form !== "undefined" && !g_form.modified) {
+		console.warn("The Page has been opened from a dirty form. The changes will be discarded on publish!");
+	}
+	
+	document.getElementById("ui_page_ok").disabled = disabled;
+	document.getElementById("ui_page_cancel").disabled = disabled;
+	initSlushBucket();
+});
+```
+
+## Unified Script Include (Client + Server-Side)
+
+```javascript
+var MyScriptInclude = Class.create();
+MyScriptInclude.MY_ATTR = "hello world";
+MyScriptInclude.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+  initialize: function(request, responseXML, gc) {
+		global.AbstractAjaxProcessor.prototype.initialize.call(this, request, responseXML, gc);
+		this.log = new global.GSLog("<sys_properties::log_level", this.type);
+	},
+  
+  myFunc: function (task, info_str) {
+    var taskGr = this._paramAsGlideRecord(task, "task", "task");
+    info_str = this._paramAsString(info_str, "info_str");
+    
+    var parentGr = taskGr.parent.getRefRecord();
+    return this._ret(parentGr);
+  },
+  
+  _ret: function (val) {
+    if (this.request) {
+      if (typeof val === "string"
+         || typeof val === "number"
+         || typeof val === "boolean") {
+        return val;
+      }
+      
+      if (val instanceof GlideRecord) {
+        var res = {};
+        for (var attr in val) {
+          res[attr] = val.getValue(attr) || "";
+        }
+        
+        return JSON.stringify(res);
+      } else if (val instanceof GlideElement) {
+        return val.toString();
+      }
+      
+      return JSON.stringify(val);
+    }
+    
+    return val;
+  },
+  
+  _paramAsGlideRecord: function (param, ajaxParam, tableName, defaultValue) {
+		if (this.request) {
+			var sysId = this.getParameter(ajaxParam);
+			if (sysId === undefined) {
+				if (defaultValue) {
+					return defaultValue;
+				}
+				
+				return new GlideRecord(tableName);
+			}
+			
+			var clientGr = new GlideRecord(tableName);
+			if (sysId == "-1") {
+				clientGr.newRecord();
+				return clientGr;
+			} else if (sysId && clientGr.get(sysId)) {
+				return clientGr;
+			}
+			
+			this.log.error("invalid sys_id for " + tableName + " (" + sysId + ")");
+			return defaultValue || clientGr;
+		}
+		
+		if (param instanceof GlideRecord) {
+			// TODO: check if param is in hirarchy of tableName
+			return param;
+		}
+		
+		var serverGr = new GlideRecord(tableName);
+		if (param == "-1") {
+			serverGr.newRecord();
+			return serverGr;
+		} else if (param && serverGr.get(param)) {
+			return serverGr;
+		}
+		
+		this.log.error("invalid sys_id for " + tableName + " (" + param + ")");
+		return defaultValue || serverGr;
+	},
+	
+	_paramAsString: function (param, ajaxParam, defaultValue) {
+		if (this.request) {
+			var str = this.getParameter(ajaxParam);
+			if (str === undefined) {
+				if (defaultValue) {
+					return defaultValue;
+				}
+				
+				return "";
+			}
+			
+			return str;
+		}
+		
+		if (typeof param === "string") {
+			return param;
+		} else if (param instanceof GlideRecord) {
+			return param.isNewRecord() ? "-1" : param.getUniqueValue();
+		} else if (param instanceof GlideElement) {
+			return param.toString();
+		} else if (param) {
+			return String(param);
+		} else if (defaultValue !== undefined) {
+			return defaultValue;
+		}
+		
+		return "";
+	},
+  
+  type: "MyScriptInclude"
+});
+```
+
+
 
 # Hall of Shame
 
