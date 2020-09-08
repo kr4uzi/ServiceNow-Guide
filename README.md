@@ -103,53 +103,53 @@ addEncodedQuery and get are one of the functions that if not called very careful
 
 ```typescript
 class GlideQueryCondition {
-	addCondition(field: string, operator: string, value?: object): GlideQueryCondition;
+  addCondition(field: string, operator: string, value?: object): GlideQueryCondition;
   addOrCondition(field: string, operator: string, value?: object): GlideQueryCondition;
 }
 
-class GlideRecord {
+  class GlideRecord {
   constructor(table: string);
-  
+
   addEncodedQuery(query: string): void;
-  
+
   // == addQuery("active", true)
-	addActiveQuery(): GlideQueryCondition;
+  addActiveQuery(): GlideQueryCondition;
   // == addQuery(field, "=", value)
-	addQuery(field: string, value: object): GlideQueryCondition;
+  addQuery(field: string, value: object): GlideQueryCondition;
   // operators:
   // =, !=, >, >=, <, <=
-	// "IN", "NOT IN"
-	// "STARTSWITH", "CONTAINS", "DOES NOT CONTAIN"
-	// "INSTANCEOF"
+  // "IN", "NOT IN"
+  // "STARTSWITH", "CONTAINS", "DOES NOT CONTAIN"
+  // "INSTANCEOF"
   // object-> cannot be an array
-	addQuery(field: string, operator: string, value: object): GlideQueryCondition;
+  addQuery(field: string, operator: string, value: object): GlideQueryCondition;
   addNotNullQuery(field: string): GlideQueryCondition;
   // equivalent to: addQuery(field, "");
   addNullQuery(field: string): GlideQueryCondition;
-  
+
   orderBy(field: string): void;
   orderByDesc(field: string): void;
-  
+
   // INNER JOIN <table> ON <GlideRecord>.grField = <table>.tableField
   addJoinQuery(table: string, grField: object, tableField: object): GlideQueryCondition;
-  
+
   // see best-practice:setLimit
   setLimit(count: number): void;
-  
+
   // dont forget to actually perform the query!
   query(): void;
-  
+
   // be extremly cautious when using the other overload of this method:
   // get(field: string, value: object), see: Hall of Shame:get
   get(sys_id: object): boolean;
-  
+
   hasNext(): boolean;  
   next(): boolean;
-  
+
   getRowCount(): number; // not the best-practice, see Best-Practice:getRowCount
   getTableName(): string;
   getRecordClassName(): string;
-  
+
   // see: best-practice:cleancode
   isValidRecord(): boolean;
   // see: best-practice:getValue
@@ -249,7 +249,7 @@ function replaceEmailIncidents() {
 
 ## getValue on non - string Fields
 
-  ```typescript
+```typescript
 function getBoolean() {
   var gr = new GlideRecord("task");
   gr.setLimit(1);
@@ -261,7 +261,7 @@ function getBoolean() {
 
 ## setLimit
 
-  ```javascript
+```javascript
 function emailIncidentExists() {
   var incidentGr = new GlideRecord("incident");
   incidentGr.addActiveQuery();
@@ -280,7 +280,7 @@ By using "hasNext()" instead of "next()" in Line 7 we avoid loading the actual v
 
 ## getRowCount
 
-  ```typescript
+```typescript
 function numberOfEmailIncidentsBad() {
   var gr = new GlideRecord("incident");
   gr.addActiveQuery();
@@ -303,7 +303,7 @@ GlideRecord:: getRowCount() can have negative performance impact on the database
 
 ## getValue
 
-  ```javascript
+```javascript
 function emailIncidentUsers() {
   var incidentGr = new GlideRecord("incident");
   incidentGr.addEncodedQuery("active=true^description=email");
@@ -372,21 +372,21 @@ function deleteIncidentGr(incidentGr) {
 }
 
 deleteIncidentGr(getIncientGrGood("<a valid sys_id>"));
-      ```
+```
 
-      Not only do you save quite some typing, but you also provide a stable interface (getValue for instance is not a stable interface because it returns null in some cases, see: getValue), that returns an valid object in any possible situation. Plus you'd have to do a isValidRecord on the returned object anyways.
+Not only do you save quite some typing, but you also provide a stable interface (getValue for instance is not a stable interface because it returns null in some cases, see: getValue), that returns an valid object in any possible situation. Plus you'd have to do a isValidRecord on the returned object anyways.
 
-      ## Client Side Dates
+## Client Side Dates
 
-      ```javascript
+```javascript
 function getDateFromDateField(fieldName) {
   var date_str = getDateFromFormat(g_form.getValue(fieldName), g_user_date_format);
-	return new Date(date_str);
+  return new Date(date_str);
 }
 
 function getDateFromDateTimeField(fieldName) {
   var date_str = getDateFromFormat(g_form.getValue(fieldName), g_user_date_time_format);
-	return new Date(date_str);
+  return new Date(date_str);
 }
 ```
 
@@ -411,13 +411,13 @@ if (typeof window === "undefined") {
 
 function handleClientSide() {
   var dialog = new GlideModal('glide_confirm_standard');
-	dialog.setTitle(new GwtMessage().getMessage('Confirmation'));
-	dialog.setPreference('warning', true);
-	dialog.setPreference('title', 'Are you sure?');
-	dialog.setPreference('onPromptComplete', function() {
+  dialog.setTitle(new GwtMessage().getMessage('Confirmation'));
+  dialog.setPreference('warning', true);
+  dialog.setPreference('title', 'Are you sure?');
+  dialog.setPreference('onPromptComplete', function() {
     gsftSubmit(null, g_form.getFormElement(), '<scope>_<action_identifier>');
-	});
-	dialog.render();
+  });
+  dialog.render();
 }
 
 function handleServerSide() {
@@ -447,32 +447,32 @@ Client script:
 
 ```javascript
 function okClicked() {
-	var sysIds = slushBucket.getValues(slushBucket.getRightSelect());
-	if (!sysIds) {
+  var sysIds = slushBucket.getValues(slushBucket.getRightSelect());
+  if (!sysIds) {
             alert("Select something!");
-	} else {
-		var modal = GlideModal.get();
-		var onSubmit = modal.getPreference("onSubmit");
-		if (typeof onSubmit === "function") {
+  } else {
+    var modal = GlideModal.get();
+    var onSubmit = modal.getPreference("onSubmit");
+    if (typeof onSubmit === "function") {
             onSubmit(sysIds);
-		}
-	}
+    }
+  }
 
-	return false;
+  return false;
 }
 
 function cancelClicked() {
-	// any function registered on onCancel shall handle the close-process
-	// if no function is registered, the dialog will close
-	var modal = GlideModal.get();
-	var onCancel = modal.getPreference("onCancel");
-	if (typeof onSubmit === "function") {
+  // any function registered on onCancel shall handle the close-process
+  // if no function is registered, the dialog will close
+  var modal = GlideModal.get();
+  var onCancel = modal.getPreference("onCancel");
+  if (typeof onSubmit === "function") {
     onCancel();
-	} else {
+  } else {
     GlideModal.get().destroy();
-	}
+  }
 
-	return false;
+  return false;
 }
 
 function initSlushBucket() {
@@ -480,28 +480,28 @@ function initSlushBucket() {
   slushBucket.addLeftChoice("sys_id", "value 1");
 
   document.getElementById("ui_page_ok").disabled = false;
-	document.getElementById("ui_page_cancel").disabled = false;
+  document.getElementById("ui_page_cancel").disabled = false;
 
   var gdw = GlideDialogWindow.get();
-	var myParam = gdw.getPreference("my_param");
+  var myParam = gdw.getPreference("my_param");
 
   var ajax = new GlideAjax("MyScriptInclude");
-	ajax.addParam("sysparm_name", "myFunction");
+  ajax.addParam("sysparm_name", "myFunction");
   ajax.addParam("my_param", myParam);
-	ajax.getXMLAnswer(function (answer) {
-		var result = JSON.parse(answer);
-		callback(result);
-	});
-}
+  ajax.getXMLAnswer(function (answer) {
+    var result = JSON.parse(answer);
+    callback(result);
+  });
+  }
 
-addLoadEvent(function() {
-	if (typeof g_form !== "undefined" && !g_form.modified) {
+  addLoadEvent(function() {
+  if (typeof g_form !== "undefined" && !g_form.modified) {
     console.warn("The Page has been opened from a dirty form. The changes will be discarded on publish!");
-	}
+  }
 
-	document.getElementById("ui_page_ok").disabled = disabled;
-	document.getElementById("ui_page_cancel").disabled = disabled;
-	initSlushBucket();
+  document.getElementById("ui_page_ok").disabled = disabled;
+  document.getElementById("ui_page_cancel").disabled = disabled;
+  initSlushBucket();
 });
 ```
 
@@ -513,8 +513,8 @@ MyScriptInclude.MY_ATTR = "hello world";
 MyScriptInclude.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
   initialize: function(request, responseXML, gc) {
     global.AbstractAjaxProcessor.prototype.initialize.call(this, request, responseXML, gc);
-		this.log = new global.GSLog("<sys_properties::log_level", this.type);
-	},
+    this.log = new global.GSLog("<sys_properties::log_level", this.type);
+  },
 
   myFunc: function (task, info_str) {
     var taskGr = this._paramAsGlideRecord(task, "task", "task");
@@ -527,8 +527,8 @@ MyScriptInclude.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
   _ret: function (val) {
     if (this.request) {
       if (typeof val === "string"
-         || typeof val === "number"
-         || typeof val === "boolean") {
+          || typeof val === "number"
+          || typeof val === "boolean") {
         return val;
       }
 
@@ -550,73 +550,73 @@ MyScriptInclude.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
   },
 
   _paramAsGlideRecord: function (param, ajaxParam, tableName, defaultValue) {
-		if (this.request) {
-			var sysId = this.getParameter(ajaxParam);
-			if (sysId === undefined) {
-				if (defaultValue) {
-					return defaultValue;
-				}
+    if (this.request) {
+      var sysId = this.getParameter(ajaxParam);
+      if (sysId === undefined) {
+        if (defaultValue) {
+          return defaultValue;
+        }
 
-				return new GlideRecord(tableName);
-			}
+        return new GlideRecord(tableName);
+      }
 
-			var clientGr = new GlideRecord(tableName);
-			if (sysId == "-1") {
+      var clientGr = new GlideRecord(tableName);
+      if (sysId == "-1") {
             clientGr.newRecord();
-				return clientGr;
-			} else if (sysId && clientGr.get(sysId)) {
-				return clientGr;
-			}
+        return clientGr;
+      } else if (sysId && clientGr.get(sysId)) {
+        return clientGr;
+      }
 
-			this.log.error("invalid sys_id for " + tableName + " (" + sysId + ")");
-			return defaultValue || clientGr;
-		}
+      this.log.error("invalid sys_id for " + tableName + " (" + sysId + ")");
+      return defaultValue || clientGr;
+    }
 
-		if (param instanceof GlideRecord) {
-			// TODO: check if param is in hirarchy of tableName
-			return param;
-		}
+    if (param instanceof GlideRecord) {
+      // TODO: check if param is in hirarchy of tableName
+      return param;
+    }
 
-		var serverGr = new GlideRecord(tableName);
-		if (param == "-1") {
+    var serverGr = new GlideRecord(tableName);
+    if (param == "-1") {
       serverGr.newRecord();
-			return serverGr;
-		} else if (param && serverGr.get(param)) {
-			return serverGr;
-		}
+      return serverGr;
+    } else if (param && serverGr.get(param)) {
+      return serverGr;
+    }
 
-		this.log.error("invalid sys_id for " + tableName + " (" + param + ")");
-		return defaultValue || serverGr;
-	},
+    this.log.error("invalid sys_id for " + tableName + " (" + param + ")");
+    return defaultValue || serverGr;
+  },
 
-	_paramAsString: function (param, ajaxParam, defaultValue) {
-		if (this.request) {
-			var str = this.getParameter(ajaxParam);
-			if (str === undefined) {
-				if (defaultValue) {
-					return defaultValue;
-				}
+  _paramAsString: function (param, ajaxParam, defaultValue) {
+    if (this.request) {
+      var str = this.getParameter(ajaxParam);
+      if (str === undefined) {
+        if (defaultValue) {
+          return defaultValue;
+        }
 
-				return "";
-			}
+        return "";
+      }
 
-			return str;
-		}
+      return str;
+    }
 
-		if (typeof param === "string") {
-			return param;
-		} else if (param instanceof GlideRecord) {
-			return param.isNewRecord() ? "-1" : param.getUniqueValue();
-		} else if (param instanceof GlideElement) {
-			return param.toString();
-		} else if (param) {
-			return String(param);
-		} else if (defaultValue !== undefined) {
-			return defaultValue;
-		}
+    if (typeof param === "string") {
+      return param;
+    } else if (param instanceof GlideRecord) {
+      return param.isNewRecord() ? "-1" : param.getUniqueValue();
+    } else if (param instanceof GlideElement) {
+      return param.toString();
+    } else if (param) {
+      return String(param);
+    } else if (defaultValue !== undefined) {
+      return defaultValue;
+    }
 
-		return "";
-	},
+    return "";
+  },
 
   type: "MyScriptInclude"
 });
