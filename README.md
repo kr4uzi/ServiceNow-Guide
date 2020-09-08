@@ -100,14 +100,14 @@ addEncodedQuery and get are one of the functions that if not called very careful
   ## GlideRecord Specification
 
 ### Lookup
-
+[Source: ServiceNow API Doc](https://developer.servicenow.com/dev.do#!/reference/api/orlando/server/no-namespace/c_GlideRecordScopedAPI)
 ```typescript
 class GlideQueryCondition {
   addCondition(field: string, operator: string, value?: object): GlideQueryCondition;
   addOrCondition(field: string, operator: string, value?: object): GlideQueryCondition;
 }
 
-  class GlideRecord {
+class GlideRecord {
   constructor(table: string);
 
   addEncodedQuery(query: string): void;
@@ -406,7 +406,7 @@ Dot walking not working properly when used on script fields.
 // Onclick: handleClientSide()
 // script:
 if (typeof window === "undefined") {
-
+  handleServerSide();
 }
 
 function handleClientSide() {
@@ -414,10 +414,12 @@ function handleClientSide() {
   dialog.setTitle(new GwtMessage().getMessage('Confirmation'));
   dialog.setPreference('warning', true);
   dialog.setPreference('title', 'Are you sure?');
-  dialog.setPreference('onPromptComplete', function() {
-    gsftSubmit(null, g_form.getFormElement(), '<scope>_<action_identifier>');
-  });
+  dialog.setPreference('onPromptComplete', onConfirmed); // inline function will not work reliable here!
   dialog.render();
+
+  function onConfirmed() {
+    gsftSubmit(null, g_form.getFormElement(), '<scope>_<action_identifier>');
+  }
 }
 
 function handleServerSide() {
@@ -449,12 +451,12 @@ Client script:
 function okClicked() {
   var sysIds = slushBucket.getValues(slushBucket.getRightSelect());
   if (!sysIds) {
-            alert("Select something!");
+    alert("Select something!");
   } else {
     var modal = GlideModal.get();
     var onSubmit = modal.getPreference("onSubmit");
     if (typeof onSubmit === "function") {
-            onSubmit(sysIds);
+      onSubmit(sysIds);
     }
   }
 
@@ -492,9 +494,9 @@ function initSlushBucket() {
     var result = JSON.parse(answer);
     callback(result);
   });
-  }
+}
 
-  addLoadEvent(function() {
+addLoadEvent(function() {
   if (typeof g_form !== "undefined" && !g_form.modified) {
     console.warn("The Page has been opened from a dirty form. The changes will be discarded on publish!");
   }
@@ -514,6 +516,12 @@ MyScriptInclude.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
   initialize: function(request, responseXML, gc) {
     global.AbstractAjaxProcessor.prototype.initialize.call(this, request, responseXML, gc);
     this.log = new global.GSLog("<sys_properties::log_level", this.type);
+
+    if (typeof request === "object" && typeof request.type === "string" && request.type.startsWith("org.apache.catalina.connector.RequestFacade")) {
+      this.log.info("Client Side");
+    } else {
+      this.log.info("Server Side");
+    }
   },
 
   myFunc: function (task, info_str) {
@@ -527,7 +535,7 @@ MyScriptInclude.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
   _ret: function (val) {
     if (this.request) {
       if (typeof val === "string"
-          || typeof val === "number"
+          || typeof val === "number"
           || typeof val === "boolean") {
         return val;
       }
@@ -622,10 +630,46 @@ MyScriptInclude.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
 });
 ```
 
+## Improved OOTB Logger
+```javascript
+var Logger = Class.create();
+Logger.prototype = Object.extendsObject(global.GSLog, {
+  initialize: function(traceProperty, caller) { global.GSLog.prototype.initialize.call(this, traceProperty, caller); },
+  trace: function(){ global.GSLog.prototype.trace.call(this, this._stringify.apply(this, arguments)); },
+  debug: function(){ global.GSLog.prototype.debug.call(this, this._stringify.apply(this, arguments)); },
+  info: function (){ global.GSLog.prototype.info.call(this, this._stringify.apply(this, arguments)); },
+  warn: function(){ global.GSLog.prototype.warn.call(this, this._stringify.apply(this, arguments)); },
+  error: function(){ global.GSLog.prototype.error.call(this, this._stringify.apply(this, arguments)); },
+  fatal: function(){ global.GSLog.prototype.fatal.call(this, this._stringify.apply(this, arguments)); },
 
+  _stringify: function () {
+    var msg = "";
+    for (var i = 0; i < arguments.length; ++i) {
+      msg += this._stringifyOne(arguments[i]);
+    }
+    
+    return msg;
+  },
+
+  _stringifyOne: function (item) {
+    if (item === undefined) {
+      return;
+    }
+    
+    if (item instanceof GlideRecord) {
+      return item.isNewRecord() ? "-1" : item.getUniqueValue();
+    } else if (item instanceof GlideElement) {
+      return item.toString();
+    }
+    
+    return JSON.stringify(item);
+  },
+
+  type: 'Logger'
+});
+```
 
 # Hall of Shame
-
 ## ||
 
 ```javascript
