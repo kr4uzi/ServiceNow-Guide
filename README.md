@@ -918,19 +918,17 @@ Go to System Definition > Dictionary, filter by table=sys_report and column name
 
 https://hi.service-now.com/kb_view.do?sysparm_article=KB0726995
 
-## UI Actions
+## Translated Fields (common)
 
 sys_translated:
 
-Element = name
+Element = <field name>
 
-Table=sys_ui_action
+Table=<table name>
 
-Value=<ui-action value of "name" field>
+Value=<Initial Value>
 
-Label=<translated text>
-
-Good Practice for translating UI-Actions is to use a unique identifier for the action name e.g. module_action_name (sys_translated's value=module_action_name). After you have inserted the sys_translated record, the UI Action name field will still store module_action_name but will actually show <translated text> in the Form!
+Label=<translated value>
 
 ## Client-Side-Scripts
 
