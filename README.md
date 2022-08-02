@@ -295,7 +295,7 @@ function numberOfEmailIncidentsGood() {
   ga.addQuery("description", "CONTAINS", "email");
   ga.addAggregate("COUNT");
   ga.query();
-  return ga.next() ? ga.getAggregate("COUNT") : 0;
+  return ga.next() ? +ga.getAggregate("COUNT") : 0;
 }
 ```
 
