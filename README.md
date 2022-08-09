@@ -507,6 +507,13 @@ addLoadEvent(function() {
 });
 ```
 
+## Global Client Side Script Include
+The AbstractAjaxProcessor::getParameter function returns a Java String object. This can be problematic when using JavaScript functions on it. For example if you use .split on the value returned by getParameter, you will get an array of Java Strings. If you use .indexOf or .filter on this array, you will most likely not get anything useful from it as those functions than compare a Java String with a JavaScript String which will return false. Be sure to cast the value:
+```javascript
+var myParam = String(this.getParameter('my_param') || '');
+myParam = myParam ? myParam.split(',') || []
+```
+
 ## Unified Script Include (Client + Server-Side)
 
 ```javascript
