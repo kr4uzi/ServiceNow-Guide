@@ -93,6 +93,8 @@ getIncidentsByDescriptionGood("^CRASH"); // prints 0 (most likely)
 
 addEncodedQuery and get are one of the functions that if not called very carefully can not only be potentially a performance bottleneck but also dangerous to your data integrety.
 
+The property controlling this behavior is: **glide.invalid_query.returns_no_rows** (this property must be set to **true** if no results should be returned in case of an invalid query).
+
 > An incorrectly constructed encoded query, such as including an ** invalid field name **, produces an invalid query.When the invalid query is run, the invalid part of the query condition is dropped, and the results are based on the valid part of the query, which may return all records from the table.Using an ** insert() **, ** update() **, ** deleteRecord() **, or ** deleteMultiple() ** method on bad query results can result in data loss.
 
 [Source: ServiceNow API Doc](https://developer.servicenow.com/app.do#!/api_doc?v=newyork&id=r_ScopedGlideRecordAddEncodedQuery_String)
