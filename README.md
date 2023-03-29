@@ -2,9 +2,16 @@
 
 In this reference we want to share my experience with the ServiceNow - Platform and ease the adoption of Best - Practice and ServiceNow specific clean code.
 
+## How to g_form in your console
+Service Portal UI: var g_form = angular.element(document).find('div.form-group[field*=formModel]').first().scope().getGlideForm()
+Standard UI: Just select the correct frame and g_form is available right away
+<img width="360" alt="image" src="https://user-images.githubusercontent.com/5402583/228592003-7e526123-c651-45e0-adf1-8a689e75ac6e.png">
+
+
 ## Transforming Filters into GlideRecord - Queries
 
 I want to present you a few techniques on how to process data from a specific table.You probably want to process only certain records and your starting point is the ServiceDesk with the table opened(Tipp: Enter<table_name>.list or<table_name>.LIST in the Application Navigator's search bar to jump directly to the table's list).
+Update: I've come to the conclusion, that using addActiveQuery shouldn't be used - it doesn't handle custom global fields ("u_active" - yeah you probably shouldn't be doing unscoped fields anyways) and it only encourages inconsistant coding.
 
 ### Simple Query
 
@@ -32,7 +39,7 @@ Using explicit queries:
 ```javascript
 function getEmailIncidents() {
     var incidentGr = new GlideRecord("incident");
-    incidentGr.addActiveQuery();
+    incidentGr.addQuery("active", "true");
     incidentGr.addQuery("description", "CONTAINS", "email");
     incidentGr.query();
 
@@ -57,7 +64,7 @@ incidentGr.query();
 
 ```javascript
 var incidentGr = new GlideRecord("incident");
-incidentGr.addActiveQuery();
+incidentGr.addQuery("active", "true");
 var descCond = incidentGr.addQuery("description", "CONTAINS", "email");
 descCond.addOrCondition("description", "CONTAINS", "server");
 incidentGr.query();
