@@ -3,7 +3,10 @@
 In this reference we want to share my experience with the ServiceNow - Platform and ease the adoption of Best - Practice and ServiceNow specific clean code.
 
 ## How to g_form in your console
-Service Portal UI: var g_form = angular.element(document).find('div.form-group[field*=formModel]').first().scope().getGlideForm()
+Service Portal UI:
+```javascript
+var g_form = angular.element(document).find('div.form-group[field*=formModel]').first().scope().getGlideForm()
+```
 Standard UI: Just select the correct frame and g_form is available right away
 <img width="360" alt="image" src="https://user-images.githubusercontent.com/5402583/228592003-7e526123-c651-45e0-adf1-8a689e75ac6e.png">
 
@@ -15,7 +18,7 @@ Update: I've come to the conclusion, that using addActiveQuery shouldn't be used
 
 ### Simple Query
 
-<img src = "https://github.com/kr4uzi/ServiceNow-Guide/blob/master/image-20191125142745663.png?raw=true" alt = "image-20191125143119776" style = "zoom:50%;" />
+![image](https://user-images.githubusercontent.com/5402583/228593358-330adc39-f837-45ec-8002-c08096468fe5.png)
 
 Using encoded Query:
 
@@ -53,8 +56,7 @@ function getEmailIncidents() {
 ```
 
 ### Advanced Query
-
-<img src = "https://github.com/kr4uzi/ServiceNow-Guide/blob/master/image-20191125160745911.png" alt = "image-20191125160745911" style = "zoom:50%;" />
+![image](https://user-images.githubusercontent.com/5402583/228593436-4bda9116-1034-4e17-80ea-515e62c69fb5.png)
 
 ```javascript
 var incidentGr = new GlideRecord("incident");
