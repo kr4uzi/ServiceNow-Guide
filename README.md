@@ -2,6 +2,9 @@
 
 In this reference we want to share my experience with the ServiceNow - Platform and ease the adoption of Best - Practice and ServiceNow specific clean code.
 
+## Block / Investigate OOTB JavaScript Client Libraries
+/nav_to.do?uri=%2Fsys_js_content_provider_rule_list.do
+
 ## How to g_form in your console
 Service Portal UI:
 ```javascript
