@@ -54,28 +54,11 @@ function getEmailIncidents() {
 
     var sysIds = [];
     while (incidentGr.next()) {
-        sysIds.push(incidentGr.sys_id.toString());
+        sysIds.push(incidentGr.getUniqueValue());
     }
 
     return sysIds;
 }
-```
-
-### Advanced Query
-![image](https://user-images.githubusercontent.com/5402583/228593436-4bda9116-1034-4e17-80ea-515e62c69fb5.png)
-
-```javascript
-var incidentGr = new GlideRecord("incident");
-incidentGr.addEncodedQuery("active=true^descriptionLIKEemail^ORdescriptionLIKEserver");
-incidentGr.query();
-```
-
-```javascript
-var incidentGr = new GlideRecord("incident");
-incidentGr.addQuery("active", "true");
-var descCond = incidentGr.addQuery("description", "CONTAINS", "email");
-descCond.addOrCondition("description", "CONTAINS", "server");
-incidentGr.query();
 ```
 
 ## addQuery vs.addEncodedQuery
@@ -110,157 +93,9 @@ addEncodedQuery and get are one of the functions that if not called very careful
 
 The property controlling this behavior is: **glide.invalid_query.returns_no_rows** (this property must be set to **true** if no results should be returned in case of an invalid query).
 
-> An incorrectly constructed encoded query, such as including an ** invalid field name **, produces an invalid query.When the invalid query is run, the invalid part of the query condition is dropped, and the results are based on the valid part of the query, which may return all records from the table.Using an ** insert() **, ** update() **, ** deleteRecord() **, or ** deleteMultiple() ** method on bad query results can result in data loss.
+> An incorrectly constructed encoded query, such as including an ** invalid field name **, produces an invalid query. When the invalid query is run, the invalid part of the query condition is dropped, and the results are based on the valid part of the query, which may return all records from the table. Using an ** insert() **, ** update() **, ** deleteRecord() **, or ** deleteMultiple() ** method on bad query results can result in data loss.
 
-[Source: ServiceNow API Doc](https://developer.servicenow.com/app.do#!/api_doc?v=newyork&id=r_ScopedGlideRecordAddEncodedQuery_String)
-
-  ## GlideRecord Specification
-
-### Lookup
-[Source: ServiceNow API Doc](https://developer.servicenow.com/dev.do#!/reference/api/orlando/server/no-namespace/c_GlideRecordScopedAPI)
-```typescript
-class GlideQueryCondition {
-  addCondition(field: string, operator: string, value?: object): GlideQueryCondition;
-  addOrCondition(field: string, operator: string, value?: object): GlideQueryCondition;
-}
-
-class GlideRecord {
-  constructor(table: string);
-
-  addEncodedQuery(query: string): void;
-
-  // == addQuery("active", true)
-  addActiveQuery(): GlideQueryCondition;
-  // == addQuery(field, "=", value)
-  addQuery(field: string, value: object): GlideQueryCondition;
-  // operators:
-  // =, !=, >, >=, <, <=
-  // "IN", "NOT IN"
-  // "STARTSWITH", "CONTAINS", "DOES NOT CONTAIN"
-  // "INSTANCEOF"
-  // object-> cannot be an array
-  addQuery(field: string, operator: string, value: object): GlideQueryCondition;
-  addNotNullQuery(field: string): GlideQueryCondition;
-  // equivalent to: addQuery(field, "");
-  addNullQuery(field: string): GlideQueryCondition;
-
-  orderBy(field: string): void;
-  orderByDesc(field: string): void;
-
-  // INNER JOIN <table> ON <GlideRecord>.grField = <table>.tableField
-  addJoinQuery(table: string, grField: object, tableField: object): GlideQueryCondition;
-
-  // see best-practice:setLimit
-  setLimit(count: number): void;
-
-  // dont forget to actually perform the query!
-  query(): void;
-
-  // be extremly cautious when using the other overload of this method:
-  // get(field: string, value: object), see: Hall of Shame:get
-  get(sys_id: object): boolean;
-
-  hasNext(): boolean;  
-  next(): boolean;
-
-  getRowCount(): number; // not the best-practice, see Best-Practice:getRowCount
-  getTableName(): string;
-  getRecordClassName(): string;
-
-  // see: best-practice:cleancode
-  isValidRecord(): boolean;
-  // see: best-practice:getValue
-  getValue(field: string): string;
-}
-```
-
-### Insert
-
-```typescript
-class GlideRecord {	
-  // prepare for new insertion (doesnt insert yet, doesnt set defaults)
-  initialize(): void;
-  
-  // performs insert and returns the sys_id
-  insert(): string;
-  
-  // sets default values (+ sys_id!), insert() must be called to persist the record
-  newRecord(): void;
-  
-  // optional reason for audit record
-  update(reason?: string): void;
-   
-  // must be used in batch updates
-  setValue(field: string, value: string): void;
-  
-  // when updating/insert: enable or disable if business rules are applied
-  setWorkflow(enabled: boolean): void;
-  
-  // see: batch update/delete
-  updateMultiple(): void;
-}
-```
-
-### Delete
-
-```typescript
-class GlideRecord {
-  // delete current record
-  deleteRecord(): void;
-  
-  // see: batch update/delete
-  deleteMultiple(): void;
-}
-```
-
-## GlideElement Specification
-
-```typescript
-class GlideElement {
-  getTableName(): string; // var gr = new GlideRecord("incident"); getTableName() == "incident"
-  getRecordClassName(): string; // var gr = new GlideRecord
-}
-```
-
-## Update / Delete multiple Records at once
-
-```javascript
-function deleteEmailIncidents() {
-  var incidentGr = new GlideRecord("incident");
-  incidentGr.addActiveQuery();
-  incidentGr.addQuery("description", "CONTAINS", "email");
-  incidentGr.deleteMultiple(); // no .query()!
-}
-
-function closeEmailIncidents() {
-  var incidentGr = new GlideRecord("incident");
-  incidentGr.addActiveQuery();
-  incidentGr.addQuery("description", "CONTAINS", "email");
-  incidentGr.setValue("state", 3); // DO NOT incidentGr.state = 3; !!
-  incidentGr.updateMultiple();
-}
-```
-
-Regarding Line 12: 
-
-> When using ** updateMultiple() **, directly setting the field(gr.state = 3) results in all records in the table being updated instead of just the records returned by the query.
-
-[Source: ServiceNow API Doc](https://developer.servicenow.com/app.do#!/api_doc?v=newyork&id=r_ScopedGlideRecordUpdateMultiple)
-
-Batch update/delete only works with static updates, if you want to dynamically update, you have to use an loop in conjuction with "gr.update()".
-
-```javascript
-function replaceEmailIncidents() {
-  var incidentGr = new GlideRecord("incident");
-  incidentGr.addActiveQuery();
-  incidentGr.addQuery("description", "CONTAINS", "email");
-  incidentGr.query();
-  while (incidentGr.next()) {
-    incidentGr.description = incidentGr.description.toString().replace("email", "");
-    incidentGr.update();
-  }
-}
-```
+[Source: ServiceNow API Doc](https://developer.servicenow.com/dev.do#!/reference/api/latest/server/no-namespace/c_GlideRecordScopedAPI#r_ScopedGlideRecordAddEncodedQuery_String)
 
 # Best - Practice Code Examples
 
@@ -276,7 +111,7 @@ function getBoolean() {
 }
 ```
 
-## setLimit
+## setLimit / test records
 
 ```javascript
 function emailIncidentExists() {
@@ -293,7 +128,7 @@ function emailIncidentExists() {
 }
 ```
 
-By using "hasNext()" instead of "next()" in Line 7 we avoid loading the actual values of record into incidentGr and thus saving a few milliseconds. If you encounter queries of this type, form a habit of structuring your functions like the example code.
+By using "hasNext()" instead of "next()" in Line 7 we avoid loading the actual values of record into incidentGr and giving a slight performance boost. If you encounter queries of this type, form a habit of structuring your functions like the example code.
 Note: The same applies to a Sys ID lookup - instead of using .get, use .addQuery("sys_id", ...) to save a few milliseconds.
 
 ## getRowCount
@@ -313,14 +148,15 @@ function numberOfEmailIncidentsGood() {
   ga.addQuery("description", "CONTAINS", "email");
   ga.addAggregate("COUNT");
   ga.query();
-  return ga.next() ? +ga.getAggregate("COUNT") : 0;
+  return ga.next() ? +ga.getAggregate("COUNT") : 0; // Note: the + will cast the string returned by getAggregate to int
 }
 ```
 
-GlideRecord:: getRowCount() can have negative performance impact on the database and should therefore not be used in production. Use GlideAggregate instead.
+GlideRecord::getRowCount() can have negative performance impact on the database and should therefore not be used in production. Use GlideAggregate instead.
 
 ## getValue
 
+Example for retrieving reference (Sys ID) values
 ```javascript
 function emailIncidentUsers() {
   var incidentGr = new GlideRecord("incident");
@@ -332,7 +168,7 @@ function emailIncidentUsers() {
   var sysIds = [];
   while (incidentGr.next()) {
     var userSysId = incidentGr.getValue("opened_by");
-    // vs. incidentGr.opened_by.sys_id.toString();
+    // vs. (bad!) incidentGr.opened_by.sys_id.toString();
     sysIds.push(userSysId);
   }
 
@@ -340,7 +176,7 @@ function emailIncidentUsers() {
 }
 ```
 
-When you want to retrieve the sys_id of a reference field, you should use getValue(field_name) instead of<field_name>.sys_id.toString(). When using the latter, you will essentially load the whole record of<field_name>.
+When you want to retrieve the sys_id of a reference field, you should use getValue(field_name) instead of<field_name>.sys_id.toString(). When using the latter, you will essentially load the whole record of <field_name>.
 Be carefull however for there are the following things to bear in mind when using getValue:
 
 - getValue cannot be called on a GlideElement in scoped applications(`incidentGr.opened_by.getValue("company")` doesnt work)
@@ -348,6 +184,7 @@ Be carefull however for there are the following things to bear in mind when usin
 - <glideRecord>.<glideElement>.toString() will always return a string even if the reference represented by <glideElement> is not set
 - only use getValue when you are absolutely certain that the field retrieving can never be empty
 
+Example for a single Sys ID retrieve (getValue returns null if no reference is set!)
 ```typescript
 function getOpenedBy(incidentSysId) {
   var incidentGr = new GlideRecord("incident");
@@ -390,7 +227,7 @@ The following example should illustrate why it is of advantage to always return 
 function deleteIncidentGr(incidentGr) {
   // no null check required
   if (incidentGr.isValidRecord()) {
-        incidentGr.deleteRecord();
+    incidentGr.deleteRecord();
   }
 }
 
@@ -400,16 +237,29 @@ deleteIncidentGr(getIncientGrGood("<a valid sys_id>"));
 Not only do you save quite some typing, but you also provide a stable interface (getValue for instance is not a stable interface because it returns null in some cases, see: getValue), that returns an valid object in any possible situation. Plus you'd have to do a isValidRecord on the returned object anyways.
 
 ## Client Side Dates
-
+Note: The following example is using a "Date-Time" Field for which the global format variable is "g_user_date_time_format". For "Date" fields, use "g_user_date_format" instead.
 ```javascript
-function getDateFromDateField(fieldName) {
-  var date_str = getDateFromFormat(g_form.getValue(fieldName), g_user_date_format);
-  return new Date(date_str);
-}
+function checkMyFieldInPast() {
+  var today = new Date();
+  today.setUTCHours(0, 0, 0, 0); // the timestamp variable below is a JS-Date object with hours, seconds, ... set to 0 => "date < today" will not work without this!
 
-function getDateFromDateTimeField(fieldName) {
-  var date_str = getDateFromFormat(g_form.getValue(fieldName), g_user_date_time_format);
-  return new Date(date_str);
+  //
+  // ServiceNow Date -> JavaScript Date
+  //
+	
+  // Note: Assuming 'my_field' is a Date Field!
+  // For Date Time fields, use g_user_date_time_format instead!
+  var timestamp = getDateFromFormat(g_form.getValue('my_field'), g_user_date_format);
+  var date = new Date(timestamp);
+  if (date < today) {
+    alert('Date cannot be in the past!');
+  }
+	
+  //
+  // JavaScript Date -> ServiceNow Date
+  //
+  var snDate = formatDate(new Date(timestamp), g_user_date_format);
+  g_form.setValue('my_field', snDate);
 }
 ```
 
@@ -433,7 +283,7 @@ function handleClientSide() {
   dialog.render();
 
   function onConfirmed() {
-    gsftSubmit(null, g_form.getFormElement(), '<Action name e.g. sysverb_update>');
+    gsftSubmit(null, g_form.getFormElement(), '<Action name e.g. sysverb_update or Sys ID of the UI Action>');
   }
 }
 
@@ -450,11 +300,22 @@ HTML
 ```xml
 <?xml version="1.0" encoding="utf-8" ?>
 <j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
-	<g:ui_slushbucket name="slushBucket" />
-	<div class="modal-footer">
+  <g:evaluate>
+    // the following script (together with the <script>-tag) shows how to expose objects from "HTML" to the "Client script" 
+    const urlParameter = RP.getParameterValue('parameter'); // from Access URL (/my_ui_page.do?parameter=hello
+    const glideModalParameter = RP.getWindowProperties().modalParameter; // gm.setPreference('modalParameter', 'world')
+    const objectForClientScript = {
+      urlParameter: urlParameter,
+      glideModalParameter: glideModalParameter
+    };
+  </g:evaluate>
+  <script>var uiPageConfig = JSON.parse('${JSON.stringify(objectForClientScript)}');</script>
+
+  <g:ui_slushbucket name="slushBucket" />
+  <div class="modal-footer">
     <span class="pull-right">
       <g:dialog_buttons_ok_cancel ok="return okClicked()" ok_id="ui_page_ok" cancel="return cancelClicked()" cancel_id="ui_page_cancel" />
-		</span>
+    </span>
   </div>
 </j:jelly>
 ```
@@ -480,7 +341,7 @@ function okClicked() {
 function cancelClicked() {
   // any function registered on onCancel shall handle the close-process
   // if no function is registered, the dialog will close
-  var modal = GlideModal.get();
+  var modal = GlideModal.get(); // Note: This line will be replaced "on display" by something like "GlideModal.prototype.get('<sys_id_of_the_ui_page_record>')
   var onCancel = modal.getPreference("onCancel");
   if (typeof onSubmit === "function") {
     onCancel();
@@ -522,7 +383,7 @@ addLoadEvent(function() {
 ```
 
 ## Client Side Script Includes
-Naming Convention by ServiceNow is AJAX. I personally dislike this as AJAX is a special technology 
+Naming Convention by ServiceNow is AJAX. As "Client" is also recognizable by non-IT people, I'd suggest to use this instead of the Ajax.
 
 ```javascript
 /* global global */
@@ -535,13 +396,31 @@ MyScriptIncludeClient.prototype = Object.extendsObject(global.AbstractAjaxProces
   },
 
   myFunc: function () {
-    var taskGr = this._paramAsGlideRecord(task, "task", "task");
-    info_str = this._paramAsString(info_str, "info_str");
+    const result = {
+      status: 'error',
+      error_message: 'unknown_error'
+    };
 
-    var parentGr = taskGr.parent.getRefRecord();
-    return this._ret(parentGr);
+    var incidentSysID = this.getParameter('incident');
+    if (incidentSysID) {
+      const incidentGr = new GlideRecordSecure('incident');
+      incidentGr.addQuery('sys_id', incidentSysID);
+      incidentGr.setLimit(1);
+      incidentGr.query();
+      if (incidentGr.next()) {
+        result.status = 'success';
+        result.description = incidentGr.description.toString();
+        result.error_message = '';
+      } else {
+        result.error_message = 'Unauthorized access or record does not exist.';
+      }
+    } else {
+      result.error_message = 'Invalid Parameters!';
+    }
+
+    return JSON.stringify(result);
   },
 
-  type: "MyScriptInclude"
+  type: 'MyScriptInclude'
 });
 ```
