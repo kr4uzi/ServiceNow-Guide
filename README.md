@@ -2,6 +2,9 @@
 
 In this reference we want to share my experience with the ServiceNow - Platform and ease the adoption of Best - Practice and ServiceNow specific clean code.
 
+The following quote from the ServiceNow Documentation is speaking for itself (taken from the GlideForm docs):
+>Some of these methods can also be used in other client scripts (such as Catalog Client Scripts or Wizard Client Scripts), but **must first be tested to determine whether they will work as expected**.
+
 ## Block / Investigate OOTB JavaScript Client Libraries
 /nav_to.do?uri=%2Fsys_js_content_provider_rule_list.do
 
