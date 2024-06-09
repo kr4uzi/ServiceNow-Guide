@@ -16,6 +16,9 @@ var g_form = angular.element(document).find('div.form-group[field*=formModel]').
 Standard UI: Just select the correct frame and g_form is available right away
 <img width="360" alt="image" src="https://user-images.githubusercontent.com/5402583/228592003-7e526123-c651-45e0-adf1-8a689e75ac6e.png">
 
+## Direct Login
+https://INSTANCE.service-now.com/login.do?sys_action=sysverb_login&user_name=USERNAME&user_password=PASSWORD
+
 
 ## Transforming Filters into GlideRecord - Queries
 
