@@ -48,7 +48,8 @@ Now create a Client Side Extension Point which in our use case would be called, 
 		g_form.addInfoMessage('My Event: ' + myArg);
 	});
 
-})();```
+})();
+```
 While I used the IIFE pattern, you can also follow the NOW-UI-Script-Pattern of the event manager on the top.
 
 Loading a UI Script dynamically in a Client Script:
@@ -60,6 +61,7 @@ ScriptLoader.getScripts(['x_424426_cextp.MyEvents.jsdbx'], function () {
 });
 // Service Portal: use the g_ui_scripts (TODO: is this the right object? hardly use that...)
 ```
+
 Note: A global UI Script doesn't need to be loaded like this, they are loaded on Forms and Lists by default.
 ... and UI Macros + UI Pages:
 ```html
@@ -72,11 +74,13 @@ Instead, you can use the following APIs:
 ```html
 <g:client_extension name="MenuItemScripts" inline="false" />
 ```
+
 inline="true":
 ```html
 <script>/* Extension Point Implementation 1 */</script>
 <script>/* Extension Point Implementation 2 */</script>
 ```
+
 inline="false":
 ```html
 <script src="SCOPE1.EXTPOINT1.jsdbx" />
@@ -97,7 +101,7 @@ Also no way to retrieve the URLs of those Implemenations so we could’ve made u
 
 So either you load the Script via the Server Side API above (combined with a GlideAjax + Client Side Script Include).\
 Or - if your Client Side Extension Point has "Allow access over AJAX/REST" = true) - you can load the scripts via a XMLHttpRequest:
-```javascript:
+```javascript
 function loadExtensionPoints(extPointName, extPointScope, callback) {
   var req = new XMLHttpRequest();
   req.open('get', '/api/now/clientextension/' + extPointName + '?sysparm_scope=' + extPointScope, false);
