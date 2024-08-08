@@ -286,6 +286,9 @@ if (typeof window === "undefined") {
 function handleClientSide() {
   var dialog = new GlideModal('glide_confirm_standard');
   dialog.setTitle(getMessage('Confirmation'));
+  // the source_record value can be retrieved in UI Page g:evaluate script via
+  // RP.getWindowProperties().source_user
+  dialog.setPreference('source_record', g_form.getUniqueValue());
   dialog.setPreference('warning', true);
   dialog.setPreference('title', 'Are you sure?');
   dialog.setPreference('onPromptComplete', onConfirmed); // inline function will not work reliable here!
