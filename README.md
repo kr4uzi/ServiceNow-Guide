@@ -335,6 +335,8 @@ HTML
 Client script:
 
 ```javascript
+uiPageConfig = JSON.parse(uiPageConfig.replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&'));
+
 function okClicked() {
   var sysIds = slushBucket.getValues(slushBucket.getRightSelect());
   if (!sysIds) {
