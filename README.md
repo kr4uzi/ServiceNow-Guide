@@ -396,6 +396,16 @@ addLoadEvent(function() {
 });
 ```
 
+## Info Message for UI Pages and Lists
+```javascript
+GlideUI.get().addOutputMessage({
+  type: 'info', // info, warning, error, success, suggestion
+  msg: 'my message'
+});
+```
+<img width="177" alt="image" src="https://github.com/user-attachments/assets/4ddad56c-1e94-4b9b-b8cb-849a5154e814">
+
+
 ## Client Side Script Includes
 Naming Convention by ServiceNow is AJAX. As "Client" is also recognizable by non-IT people, I'd suggest to use this instead of the Ajax.
 
