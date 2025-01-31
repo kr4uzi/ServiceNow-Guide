@@ -1,5 +1,6 @@
 The following example code implements a record watcher in the classic UI which detects attachment upload/modify/delete on a given record.
-It is intended to be added to a UI Macro, but and also be adapted to work "onLoad" (just take the callback of the addLoadEvent).
+It is intended to be added to a UI Macro, but and also be adapted to work "onLoad" (just take the callback of the addLoadEvent).\
+Note: The following readonly property (use gs.info) contains the deny-list for the recordwatcher: **glide.record_watcher.table.blacklist**
 ```javascript
 (function () {
    addLoadEvent(function () {		
